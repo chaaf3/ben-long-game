@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A Day in the Life of Ben Long</title>
-  <link rel="stylesheet" href="styles.css?v=20260520-ben">
+  <link rel="stylesheet" href="styles.css?v=20260520-talk">
 </head>
 <body>
   <main class="game-shell">
@@ -118,7 +118,8 @@
           <button type="button" data-dir="left" aria-label="move left">&larr;</button>
           <button type="button" data-dir="right" aria-label="move right">&rarr;</button>
         </div>
-        <p id="prompt">Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.</p>
+        <button id="talk" class="talk-button" type="button" disabled>talk</button>
+        <p id="prompt">Use arrow keys or the buttons. Walk Ben near someone and press talk to start a conversation he cannot finish.</p>
         <button id="reset" type="button">restart the day</button>
       </div>
     </div>
@@ -151,6 +152,7 @@
     const auraFill = document.getElementById("aura-fill");
     const auraText = document.getElementById("aura-text");
     const slap = document.getElementById("slap");
+    const talk = document.getElementById("talk");
     const reset = document.getElementById("reset");
     const tryAgain = document.getElementById("try-again");
     const npcs = [...document.querySelectorAll(".npc")];
@@ -186,6 +188,11 @@
       auraFill.classList.toggle("dead", aura <= 0);
     }
 
+    function updateTalkButton() {
+      talk.disabled = locked || !activeNpc;
+      talk.textContent = activeNpc ? "talk" : "walk closer";
+    }
+
     function move(direction) {
       if (locked) return;
       x = Math.max(5, Math.min(91, x + direction * 4));
@@ -206,17 +213,19 @@
       });
 
       if (activeNpc) {
-        prompt.textContent = `Press Enter to talk to ${activeNpc.dataset.name}. This cannot end well.`;
+        prompt.textContent = `Press talk to approach ${activeNpc.dataset.name}. This cannot end well.`;
         prompt.classList.add("danger");
       } else {
-        prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.";
+        prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press talk to start a conversation he cannot finish.";
         prompt.classList.remove("danger");
       }
+      updateTalkButton();
     }
 
     function openDialog() {
       if (!activeNpc || locked) return;
       locked = true;
+      updateTalkButton();
       const shuffled = [...lines].sort(() => Math.random() - 0.5).slice(0, 4);
       targetLine.textContent = `Target acquired: ${activeNpc.dataset.name}.`;
       lineOptions.innerHTML = "";
@@ -261,8 +270,9 @@
       placePlayer();
       updateAura();
       confidence.textContent = "3%";
-      prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.";
+      prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press talk to start a conversation he cannot finish.";
       prompt.classList.remove("danger");
+      updateTalkButton();
       dialog.classList.add("hidden");
       gameOver.classList.add("hidden");
       player.classList.remove("slapped");
@@ -284,11 +294,13 @@
       button.addEventListener("click", () => move(button.dataset.dir === "left" ? -1 : 1));
     });
 
+    talk.addEventListener("click", openDialog);
     reset.addEventListener("click", restart);
     tryAgain.addEventListener("click", restart);
     window.addEventListener("resize", checkNpc);
     placePlayer();
     updateAura();
+    checkNpc();
   </script>
 </body>
 </html>

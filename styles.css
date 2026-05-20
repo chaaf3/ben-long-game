@@ -44,6 +44,17 @@ button:hover {
   background: linear-gradient(180deg, #8f3a34, #42130f);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  color: #aaa;
+  background: linear-gradient(180deg, #5a5e66, #2a2d33);
+  text-shadow: 1px 1px #000;
+}
+
+button:disabled:hover {
+  background: linear-gradient(180deg, #5a5e66, #2a2d33);
+}
+
 .game-shell {
   display: grid;
   min-height: 100vh;
@@ -615,7 +626,7 @@ button:hover {
 
 .controls {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   padding: 10px;
@@ -631,6 +642,16 @@ button:hover {
 .keys button {
   width: 58px;
   font-size: 1.4rem;
+}
+
+.talk-button {
+  width: 132px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, #4b7f43, #1f4621);
+}
+
+.talk-button:not(:disabled) {
+  animation: talkPulse 0.85s steps(2) infinite;
 }
 
 #prompt {
@@ -765,10 +786,26 @@ button:hover {
   }
 }
 
+@keyframes talkPulse {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
 @media (max-width: 760px) {
   .hud,
   .controls {
     grid-template-columns: 1fr;
+  }
+
+  .keys {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .keys button,
+  .talk-button {
+    width: 100%;
   }
 
   .stage {
