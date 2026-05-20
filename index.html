@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Day in the Life of Ben Long</title>
+  <link rel="stylesheet" href="styles.css?v=20260520-ben">
+</head>
+<body>
+  <main class="game-shell">
+    <div class="crt">
+      <div class="hud">
+        <div>
+          <span class="label">GAME</span>
+          <strong>A DAY IN THE LIFE OF BEN LONG</strong>
+        </div>
+        <div>
+          <span class="label">MISSION</span>
+          <strong>Approach / Brag / Perish Socially</strong>
+        </div>
+        <div>
+          <span class="label">CONFIDENCE</span>
+          <strong id="confidence">3%</strong>
+        </div>
+        <div class="aura-panel">
+          <span class="label">AURA ECONOMY</span>
+          <div class="aura-shell" aria-label="Ben aura bar">
+            <div id="aura-fill" class="aura-fill"></div>
+          </div>
+          <strong id="aura-text">100%</strong>
+        </div>
+      </div>
+
+      <section class="stage" aria-label="A Day in the Life of Ben Long game area">
+        <div class="sky">
+          <div class="sun">BEN</div>
+          <div class="cloud c1">social stats loading</div>
+          <div class="cloud c2">BMW financed</div>
+        </div>
+        <div class="ground">
+          <div class="floor-grid"></div>
+          <div class="car">
+            <div class="car-top">BMW</div>
+            <div class="car-body"></div>
+            <div class="wheel w1"></div>
+            <div class="wheel w2"></div>
+          </div>
+          <div class="trash t1">HOI4</div>
+          <div class="trash t2">6'2?</div>
+          <div class="trash t3">APR</div>
+        </div>
+
+        <div class="npc npc-one" data-name="Mall Kiosk Queen">
+          <div class="stick-head">
+            <span class="hair hair-left"></span>
+            <span class="hair hair-right"></span>
+            <span class="eye eye-left"></span>
+            <span class="eye eye-right"></span>
+            <span class="lip"></span>
+            <span class="earring earring-left"></span>
+            <span class="earring earring-right"></span>
+          </div>
+          <div class="stick-body dress"></div>
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+          <div class="purse"></div>
+          <div class="leg left"></div>
+          <div class="leg right"></div>
+          <div class="speech">...</div>
+        </div>
+
+        <div class="npc npc-two" data-name="Grocery Store Goddess">
+          <div class="stick-head">
+            <span class="hair bob"></span>
+            <span class="eye eye-left"></span>
+            <span class="eye eye-right"></span>
+            <span class="lip"></span>
+            <span class="earring earring-left"></span>
+          </div>
+          <div class="stick-body dress purple"></div>
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+          <div class="phone"></div>
+          <div class="leg left"></div>
+          <div class="leg right"></div>
+          <div class="speech">hmm</div>
+        </div>
+
+        <div class="npc npc-three" data-name="DMV Angel">
+          <div class="stick-head">
+            <span class="hair pony"></span>
+            <span class="bangs"></span>
+            <span class="eye eye-left"></span>
+            <span class="eye eye-right"></span>
+            <span class="lip"></span>
+            <span class="earring earring-right"></span>
+          </div>
+          <div class="stick-body dress green"></div>
+          <div class="arm left"></div>
+          <div class="arm right"></div>
+          <div class="bracelet"></div>
+          <div class="leg left"></div>
+          <div class="leg right"></div>
+          <div class="speech">next</div>
+        </div>
+
+        <div id="player" class="player" aria-label="player">
+          <img class="ben-sprite" src="ben-full-body.jpeg" alt="Ben Long">
+          <span class="hat">6'2?</span>
+          <div class="name-tag">BEN</div>
+        </div>
+
+        <div id="slap" class="slap">SLAP</div>
+      </section>
+
+      <div class="controls">
+        <div class="keys">
+          <button type="button" data-dir="left" aria-label="move left">&larr;</button>
+          <button type="button" data-dir="right" aria-label="move right">&rarr;</button>
+        </div>
+        <p id="prompt">Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.</p>
+        <button id="reset" type="button">restart the day</button>
+      </div>
+    </div>
+
+    <div id="dialog" class="dialog hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <div class="dialog-box">
+        <h1 id="dialog-title">Choose Ben's Opener</h1>
+        <p id="target-line">Target acquired: unknown woman.</p>
+        <div id="line-options" class="line-options"></div>
+      </div>
+    </div>
+
+    <div id="game-over" class="game-over hidden" role="dialog" aria-modal="true">
+      <div class="game-over-box">
+        <div class="death-title">GAME OVER</div>
+        <p>ben's aura economy is bankrupt and he will become a permanent basement dweller rather than getting life mogged</p>
+        <button id="try-again" type="button">try again, same Ben</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const player = document.getElementById("player");
+    const prompt = document.getElementById("prompt");
+    const confidence = document.getElementById("confidence");
+    const dialog = document.getElementById("dialog");
+    const lineOptions = document.getElementById("line-options");
+    const targetLine = document.getElementById("target-line");
+    const gameOver = document.getElementById("game-over");
+    const auraFill = document.getElementById("aura-fill");
+    const auraText = document.getElementById("aura-text");
+    const slap = document.getElementById("slap");
+    const reset = document.getElementById("reset");
+    const tryAgain = document.getElementById("try-again");
+    const npcs = [...document.querySelectorAll(".npc")];
+
+    const lines = [
+      "Before you say anything, I should mention I am pretty tall. Like, useful-at-concerts tall.",
+      "I drive a BMW, but I am still humble enough to bring it up immediately.",
+      "I have 900 hours in Hearts of Iron IV, so I understand long-term commitment and questionable decisions.",
+      "Not to flex, but I can explain supply lines in Hearts of Iron in a way that ruins dinner.",
+      "I am basically six foot two if the room has flattering lighting and no measuring tape.",
+      "My BMW has sport mode, which is kind of like having a personality with buttons.",
+      "I once won as Italy in Hearts of Iron, so emotionally I am ready for anything except this conversation.",
+      "People say tall guys have confidence, and I am hoping they are correct before this sentence ends.",
+      "Do you want to hear about my car, my height, or my grand strategy ranking first?",
+      "I am not saying I am a catch, but my parking spot does have a BMW in it.",
+      "I am actually pretty good at golf, which is why I approach every conversation like a long putt no one asked to watch.",
+      "My short game is elite, my BMW is outside, and my opener is unfortunately still loading."
+    ];
+
+    let x = 52;
+    let aura = 100;
+    let locked = false;
+    let activeNpc = null;
+
+    function placePlayer() {
+      player.style.left = `${x}%`;
+    }
+
+    function updateAura() {
+      auraFill.style.width = `${aura}%`;
+      auraText.textContent = `${aura}%`;
+      auraFill.classList.toggle("low", aura <= 35);
+      auraFill.classList.toggle("dead", aura <= 0);
+    }
+
+    function move(direction) {
+      if (locked) return;
+      x = Math.max(5, Math.min(91, x + direction * 4));
+      placePlayer();
+      confidence.textContent = `${Math.max(1, Math.round(9 - Math.abs(52 - x) / 5))}%`;
+      checkNpc();
+    }
+
+    function getPlayerCenter() {
+      return player.getBoundingClientRect().left + player.getBoundingClientRect().width / 2;
+    }
+
+    function checkNpc() {
+      const center = getPlayerCenter();
+      activeNpc = npcs.find((npc) => {
+        const box = npc.getBoundingClientRect();
+        return Math.abs(center - (box.left + box.width / 2)) < 78;
+      });
+
+      if (activeNpc) {
+        prompt.textContent = `Press Enter to talk to ${activeNpc.dataset.name}. This cannot end well.`;
+        prompt.classList.add("danger");
+      } else {
+        prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.";
+        prompt.classList.remove("danger");
+      }
+    }
+
+    function openDialog() {
+      if (!activeNpc || locked) return;
+      locked = true;
+      const shuffled = [...lines].sort(() => Math.random() - 0.5).slice(0, 4);
+      targetLine.textContent = `Target acquired: ${activeNpc.dataset.name}.`;
+      lineOptions.innerHTML = "";
+      shuffled.forEach((line) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = line;
+        button.addEventListener("click", () => chooseLine(line));
+        lineOptions.append(button);
+      });
+      dialog.classList.remove("hidden");
+    }
+
+    function chooseLine(line) {
+      dialog.classList.add("hidden");
+      activeNpc.querySelector(".speech").textContent = "absolutely not";
+      prompt.textContent = `Ben opened with: "${line}" The room loses oxygen.`;
+      slap.classList.add("active");
+      player.classList.add("slapped");
+      activeNpc.classList.add("slapping");
+      setTimeout(() => {
+        aura = Math.max(0, aura - 25);
+        updateAura();
+        slap.classList.remove("active");
+        player.classList.remove("slapped");
+        activeNpc.classList.remove("slapping");
+        if (aura <= 0) {
+          gameOver.classList.remove("hidden");
+        } else {
+          locked = false;
+          prompt.textContent = `Aura damage taken. Ben's aura economy is down to ${aura}%. Try another opener if you hate him.`;
+          checkNpc();
+        }
+      }, 900);
+    }
+
+    function restart() {
+      x = 52;
+      aura = 100;
+      locked = false;
+      activeNpc = null;
+      placePlayer();
+      updateAura();
+      confidence.textContent = "3%";
+      prompt.textContent = "Use arrow keys or the buttons. Walk Ben near someone and press Enter to start a conversation he cannot finish.";
+      prompt.classList.remove("danger");
+      dialog.classList.add("hidden");
+      gameOver.classList.add("hidden");
+      player.classList.remove("slapped");
+      slap.classList.remove("active");
+      npcs.forEach((npc) => {
+        npc.classList.remove("slapping");
+        npc.querySelector(".speech").textContent = npc.classList.contains("npc-three") ? "next" : npc.classList.contains("npc-two") ? "hmm" : "...";
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") move(-1);
+      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") move(1);
+      if (event.key === "Enter") openDialog();
+      if (event.key === "Escape") restart();
+    });
+
+    document.querySelectorAll("[data-dir]").forEach((button) => {
+      button.addEventListener("click", () => move(button.dataset.dir === "left" ? -1 : 1));
+    });
+
+    reset.addEventListener("click", restart);
+    tryAgain.addEventListener("click", restart);
+    window.addEventListener("resize", checkNpc);
+    placePlayer();
+    updateAura();
+  </script>
+</body>
+</html>
